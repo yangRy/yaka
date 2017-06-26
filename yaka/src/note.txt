@@ -1,0 +1,15 @@
+yk_http_request_t是整个服务器的核心
+该数据结构记录了
+被epoll监听的描述符
+yk_epoll_create返回的epoll的描述符
+状态机相关的东西
+数据缓冲区
+以及....
+
+每当有新的连接的时候，都会动态生成一个yk_http_request_t，将其初始化，并加入到epoll的监听队列中
+
+当为用户服务(do_request)的时候如果出现了错误，则free掉它，不然就再次将其加入到epoll的监听队列中
+状态机里面，如果一次for循环就能解析完毕，那么就会跳到done标签处，否则会记录当前状态机的状态，并且返回ZV_AGAIN
+
+epoll注册event和向其指定的event缓冲区没有直接联系
+epoll是由内核管理的，因此epoll的监听和本身程序的运行可以看成是并发的
